@@ -4,6 +4,8 @@
     <string name="content_main_text_view">Nearby APIのテスト</string>
     <string name="content_main_button">送信</string>
     <string name="button_text_message">メッセージ</string>
-    <string name="button_text_passing">すれ違い</string>
+    <string name="button_text_passing">すれ違いっぽいもの</string>
+    <string name="button_text_beacon">びーこん</string>
+    <string name="button_text_music">みゅーじっく</string>
 
 </resources>

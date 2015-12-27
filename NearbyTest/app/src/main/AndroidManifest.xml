@@ -28,6 +28,11 @@
         <activity
             android:name=".PassingActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".GetBeaconActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MusicActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -40,7 +39,6 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
             .setDistanceType(Strategy.DISTANCE_TYPE_DEFAULT)
             .setTtlSeconds(Strategy.TTL_SECONDS_DEFAULT)
             .build();
-    //timer
     private Timer mTimer = null;
     private PublishTimer publishTimer;
     private Handler mHandler = new Handler();
@@ -60,22 +58,22 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
             @Override
             public void onFound(final Message message) {
                 final String nearbyMessageString = new String(message.getContent());
-                // メッセージを受信した時の処理
+                // メッセージ受信に成功
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(PassingActivity.this, "成功" + nearbyMessageString, Toast.LENGTH_LONG).show();
+                        Toast.makeText(PassingActivity.this, "こんなのが送られてきたっぽい:" + nearbyMessageString, Toast.LENGTH_LONG).show();
                     }
                 });
             }
 
             public void onLost(final Message message) {
                 final String nearbyMessageString = new String(message.getContent());
-                // メッセージを受信した時の処理
+                // メッセージ受信に失敗
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(PassingActivity.this, "失敗しったぽい" + nearbyMessageString, Toast.LENGTH_LONG).show();
+                        Toast.makeText(PassingActivity.this, "失敗しったぽい:" + nearbyMessageString, Toast.LENGTH_LONG).show();
                     }
                 });
             }
@@ -155,7 +153,7 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                 googleApiClient.connect();
             }
         } else {
-            String strMsg = "すれ違い通信だぜ" + Build.PRODUCT + new Random().nextInt(30);
+            String strMsg = Build.PRODUCT + new Random().nextInt(30);
             mDeviceInfoMessage = new Message(strMsg.getBytes());
             PublishOptions options = new PublishOptions.Builder()
                     .setStrategy(PUB_SUB_STRATEGY)
@@ -165,7 +163,7 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(PassingActivity.this, "PublishOptionsが終わった？？？？", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(PassingActivity.this, "接続が切れたっぽい", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -180,11 +178,10 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(PassingActivity.this, "Published successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(PassingActivity.this, "送信成功したっぽい", Toast.LENGTH_LONG).show();
                                     }
                                 });
                             } else {
-                                Log.i("MainActivity", "Could not publish.");
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
@@ -215,11 +212,10 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                         @Override
                         public void onExpired() {
                             super.onExpired();
-                            // 受信状態が終了した時のコールバック
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(PassingActivity.this, "終わった", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(PassingActivity.this, "接続が切れたっぽいよ", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -234,7 +230,7 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(PassingActivity.this, "Subscribed successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(PassingActivity.this, "受信できるようになったぽいよ", Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 //タイマーインスタンス生成
@@ -245,9 +241,6 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                                 //タイマースケジュール設定＆開始
                                 mTimer.scheduleAtFixedRate(publishTimer, 0, 10000);
                             } else {
-                                Log.i("MainActivity", "Could not subscribe.");
-                                // Check whether consent was given;
-                                // if not, prompt the user for consent.
                                 handleUnsuccessfulNearbyResult(status);
                             }
                         }
@@ -279,7 +272,7 @@ public class PassingActivity extends AppCompatActivity  implements GoogleApiClie
                         "なんかネットワークに問題あるよ",
                         Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(PassingActivity.this, "Unsuccessful: " +
+                Toast.makeText(PassingActivity.this, "なんかよくわからんけど失敗っぽい: " +
                         status.getStatusMessage(), Toast.LENGTH_LONG).show();
             }
 

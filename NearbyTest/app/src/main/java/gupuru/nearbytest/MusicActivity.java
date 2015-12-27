@@ -3,12 +3,13 @@ package gupuru.nearbytest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,14 +25,19 @@ import com.google.android.gms.nearby.messages.PublishOptions;
 import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.SubscribeCallback;
 import com.google.android.gms.nearby.messages.SubscribeOptions;
+import com.google.gson.Gson;
 
-public class MessageActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+import java.io.IOException;
+
+public class MusicActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private GoogleApiClient googleApiClient;
     private boolean mResolvingNearbyPermissionError = false;
     private Message mDeviceInfoMessage;
     private MessageListener messageListener;
+    private MediaPlayer mediaPlayer;
+    private TextView stateTextView;
     private static final Strategy PUB_SUB_STRATEGY = new Strategy.Builder()
             .setDiscoveryMode(Strategy.DISCOVERY_MODE_DEFAULT)
             .setDistanceType(Strategy.DISTANCE_TYPE_DEFAULT)
@@ -43,41 +49,38 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_music);
 
-        googleApiClient = new GoogleApiClient.Builder(MessageActivity.this)
+        googleApiClient = new GoogleApiClient.Builder(MusicActivity.this)
                 .addApi(Nearby.MESSAGES_API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        mediaPlayer = MediaPlayer.create(this, R.raw.music);
+        stateTextView = (TextView) findViewById(R.id.state);
+
         messageListener = new MessageListener() {
             @Override
             public void onFound(final Message message) {
-                final String nearbyMessageString = new String(message.getContent());
-                // メッセージを受信したとき
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MessageActivity.this, "こんなのが送られてきたっぽい: " + nearbyMessageString, Toast.LENGTH_LONG).show();
-                    }
-                });
+                music(new String(message.getContent()));
             }
 
             public void onLost(final Message message) {
-                final String nearbyMessageString = new String(message.getContent());
                 // メッセージを受信失敗したとき
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MessageActivity.this, "失敗しったぽい:" + nearbyMessageString, Toast.LENGTH_LONG).show();
+                        Toast.makeText(MusicActivity.this, "失敗しったぽい", Toast.LENGTH_LONG).show();
                     }
                 });
             }
         };
 
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(this);
+        Button startBtn = (Button) findViewById(R.id.start);
+        startBtn.setOnClickListener(this);
+        Button stopBtn = (Button) findViewById(R.id.stop);
+        stopBtn.setOnClickListener(this);
 
     }
 
@@ -96,6 +99,9 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
             unpublish();
             googleApiClient.disconnect();
         }
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        mediaPlayer = null;
         super.onStop();
     }
 
@@ -136,9 +142,13 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button:
+            case R.id.start:
                 //送信
-                publish();
+                publish(Constants.MUSIC_START);
+                break;
+            case R.id.stop:
+                //送信
+                publish(Constants.MUSIC_STOP);
                 break;
             default:
                 break;
@@ -165,18 +175,17 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
     /**
      * メッセージ送信
      */
-    private void publish() {
+    private void publish(String action) {
         if (!googleApiClient.isConnected()) {
             if (!googleApiClient.isConnecting()) {
                 googleApiClient.connect();
             }
         } else {
-            EditText editText = (EditText) findViewById(R.id.edittext);
-            String strMsg = editText.getText().toString();
-            if (strMsg.equals("")) {
-                strMsg = "からっぽい";
-            }
-            mDeviceInfoMessage = new Message(strMsg.getBytes());
+
+            MusicEntity musicEntity = new MusicEntity(action, System.currentTimeMillis());
+            String data = new Gson().toJson(musicEntity);
+
+            mDeviceInfoMessage = new Message(data.getBytes());
             PublishOptions options = new PublishOptions.Builder()
                     .setStrategy(PUB_SUB_STRATEGY)
                     .setCallback(new PublishCallback() {
@@ -185,7 +194,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(MessageActivity.this, "通信終了したっぽい", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MusicActivity.this, "通信終了したっぽい", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -200,7 +209,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(MessageActivity.this, "送信成功したっぽい", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MusicActivity.this, "送信成功したっぽい", Toast.LENGTH_LONG).show();
                                     }
                                 });
                             } else {
@@ -243,7 +252,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(MessageActivity.this, "終了したっぽい", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MusicActivity.this, "終了したっぽい", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -258,7 +267,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(MessageActivity.this, "受信できるようになったぽい", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MusicActivity.this, "受信できるようになったぽい", Toast.LENGTH_LONG).show();
                                     }
                                 });
                             } else {
@@ -284,7 +293,7 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
             if (!mResolvingNearbyPermissionError) {
                 try {
                     mResolvingNearbyPermissionError = true;
-                    status.startResolutionForResult(MessageActivity.this,
+                    status.startResolutionForResult(MusicActivity.this,
                             Constants.REQUEST_RESOLVE_ERROR);
                 } catch (IntentSender.SendIntentException e) {
                     e.printStackTrace();
@@ -292,13 +301,38 @@ public class MessageActivity extends AppCompatActivity implements GoogleApiClien
             }
         } else {
             if (status.getStatusCode() == ConnectionResult.NETWORK_ERROR) {
-                Toast.makeText(MessageActivity.this, "なんかネットワークに問題あるっぽいよ",
+                Toast.makeText(MusicActivity.this, "なんかネットワークに問題あるっぽいよ",
                         Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(MessageActivity.this, "なんかよく分からんけど失敗したっぽい: " +
+                Toast.makeText(MusicActivity.this, "なんかよく分からんけど失敗したっぽい: " +
                         status.getStatusMessage(), Toast.LENGTH_LONG).show();
             }
+        }
+    }
 
+    private void music(String action){
+        MusicEntity musicEntity = new Gson().fromJson(action, MusicEntity.class);
+        if (musicEntity != null) {
+            stateTextView.setText(musicEntity.getAction());
+            switch (musicEntity.getAction()) {
+                case Constants.MUSIC_START:
+                    if (!mediaPlayer.isPlaying()) {
+                        mediaPlayer.start();
+                    }
+                    break;
+                case Constants.MUSIC_STOP:
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                        try {
+                            mediaPlayer.prepare();
+                        } catch (IllegalStateException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

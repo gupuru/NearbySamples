@@ -20,4 +20,16 @@
         android:layout_height="wrap_content"
         android:text="@string/button_text_passing"/>
 
+    <Button
+        android:id="@+id/beacon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_text_beacon"/>
+
+    <Button
+        android:id="@+id/music"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_text_music"/>
+
 </LinearLayout>

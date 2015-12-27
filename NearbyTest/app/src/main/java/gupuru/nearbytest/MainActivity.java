@@ -17,6 +17,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         messageBtn.setOnClickListener(this);
         Button passingBtn = (Button) findViewById(R.id.passing);
         passingBtn.setOnClickListener(this);
+        Button beaconBtn = (Button) findViewById(R.id.beacon);
+        beaconBtn.setOnClickListener(this);
+        Button musicBtn = (Button) findViewById(R.id.music);
+        musicBtn.setOnClickListener(this);
 
     }
 
@@ -32,8 +36,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(MainActivity.this, PassingActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.beacon:
+                intent = new Intent(MainActivity.this, GetBeaconActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.music:
+                intent = new Intent(MainActivity.this, MusicActivity.class);
+                startActivity(intent);
+                break;
             default:
                 break;
         }
     }
+
 }
