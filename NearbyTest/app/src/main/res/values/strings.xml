@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">NearbyTest</string>
+    <string name="action_settings">Settings</string>
+    <string name="content_main_text_view">Nearby APIのテスト</string>
+    <string name="content_main_button">送信</string>
+    <string name="button_text_message">メッセージ</string>
+    <string name="button_text_passing">すれ違い</string>
+
+</resources>
